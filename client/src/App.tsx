@@ -7,11 +7,12 @@ export default function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   const handleAddTask = (
+    id: number,
     title: string,
     date: string,
     is_completed: boolean
   ) => {
-    const newTask = { title, date, is_completed };
+    const newTask = { id, title, date, is_completed };
     setTasks([...tasks, newTask]);
     console.log(newTask);
   };
