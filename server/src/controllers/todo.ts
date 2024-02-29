@@ -1,5 +1,5 @@
 //todo.ts
-import { QueryResult } from "pg";
+import { Query, QueryResult } from "pg";
 import { pool } from "../config/db.config";
 
 interface Todo {
@@ -36,4 +36,20 @@ const createTodo = async (newTodo: Todo): Promise<QueryResult> => {
   }
 };
 
-export { getAllTodos, createTodo };
+const updateTodo = async (
+  todoId: number,
+  updatedFields: { is_completed?: boolean }
+): Promise<QueryResult> => {
+  const query = "UPDATE todo SET is_completed = $1 WHERE id = $2 RETURNING *";
+  const values = [updatedFields.is_completed, todoId];
+
+  try {
+    const result = await pool.query(query, values);
+    return result;
+  } catch (error) {
+    console.error("Error updating todo:", error.message);
+    throw error;
+  }
+};
+
+export { getAllTodos, createTodo, updateTodo };
