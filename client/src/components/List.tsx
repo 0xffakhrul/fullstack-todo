@@ -2,6 +2,7 @@ import axios from "axios";
 import { FC, useEffect, useState } from "react";
 
 export interface Task {
+  id: number;
   title: string;
   date: string;
   is_completed: boolean;
@@ -26,7 +27,23 @@ const List: FC<ListProps> = () => {
     };
 
     fetchTasks();
-  }, [tasks]);
+  }, []);
+
+  const handleMarkAsDone = async (id: number) => {
+    try {
+      await axios.patch(`http://localhost:6969/todos/${id}`, {
+        is_completed: true,
+      });
+
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id === id ? { ...task, is_completed: true } : task
+        )
+      );
+    } catch (error) {
+      console.error("error updating", error);
+    }
+  };
 
   const filteredTask = tasks.filter((task) => {
     if (selectedTab === "all") {
@@ -79,7 +96,10 @@ const List: FC<ListProps> = () => {
               </p>
             </div>
             <div className="space-y-1 space-x-4">
-              <button className="btn btn-success font-bold text-base rounded-xl h-8 min-h-6">
+              <button
+                onClick={() => handleMarkAsDone(task.id)}
+                className="btn btn-success font-bold text-base rounded-xl h-8 min-h-6"
+              >
                 Done
               </button>
               <button className="btn btn-accent font-bold text-base rounded-xl h-8 min-h-6">
