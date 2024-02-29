@@ -2,7 +2,12 @@ import axios from "axios";
 import { FC, useState } from "react";
 
 interface InputProps {
-  onAddTask: (title: string, date: string, is_completed: boolean) => void;
+  onAddTask: (
+    id: number,
+    title: string,
+    date: string,
+    is_completed: boolean
+  ) => void;
 }
 
 const Input: FC<InputProps> = ({ onAddTask }) => {
@@ -23,7 +28,12 @@ const Input: FC<InputProps> = ({ onAddTask }) => {
         });
 
         const newTask = response.data;
-        onAddTask(newTask.title, newTask.date, newTask.is_completed);
+        onAddTask(
+          newTask.id,
+          newTask.title,
+          newTask.date,
+          newTask.is_completed
+        );
         setTitle("");
       } catch (error) {
         console.error("Error creating task:", error);
