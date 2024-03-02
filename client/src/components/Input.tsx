@@ -1,48 +1,32 @@
-import axios from "axios";
 import { FC, useState } from "react";
 
 interface InputProps {
-  onAddTask: (
-    id: number,
-    title: string,
-    date: string,
-    is_completed: boolean
-  ) => void;
+  onAddTask: any;
 }
 
 const Input: FC<InputProps> = ({ onAddTask }) => {
   const [title, setTitle] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const currentDate = new Date();
-    const formattedDate = currentDate.toISOString();
-
-    if (title.trim() !== "" && formattedDate.trim() !== "") {
-      try {
-        const response = await axios.post("http://localhost:6969/todos", {
-          title,
-          date: formattedDate,
-          is_completed: false,
-        });
-
-        const newTask = response.data;
-        onAddTask(
-          newTask.id,
-          newTask.title,
-          newTask.date,
-          newTask.is_completed
-        );
-        setTitle("");
-      } catch (error) {
-        console.error("Error creating task:", error);
-      }
+    if (!title.trim()) {
+      return; 
     }
+
+    const newTodo = {
+      title,
+      date: new Date().toISOString(), // Set current date as ISO string
+      is_completed: false, 
+    };
+    onAddTask(newTodo);
+
+    console.log(newTodo); // Log the new todo object
+    setTitle(""); 
   };
 
   return (
-    <div>
+    <div className="mb-8">
       <form onSubmit={handleSubmit} className="flex items-center gap-3">
         <input
           type="text"

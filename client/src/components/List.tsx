@@ -1,57 +1,46 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { FC, useEffect, useState } from "react";
+import { updateTodo, useFetchTodos } from "../hooks/useTodo";
+import { Todo } from "../utils/types";
 
-export interface Task {
-  id: number;
-  title: string;
-  date: string;
-  is_completed: boolean;
-}
-
-interface ListProps {
-  // tasks: Task[];
-}
+interface ListProps {}
 
 const List: FC<ListProps> = () => {
   const [selectedTab, setSelectedTab] = useState("all");
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const response = await axios.get("http://localhost:6969/todos");
-        setTasks(response.data);
-      } catch (error) {
-        console.error("Error fetching tasks:", error);
-      }
-    };
+  const {
+    isLoading,
+    data: todos,
+    error,
+  } = useQuery({ queryKey: ["todos"], queryFn: useFetchTodos });
 
-    fetchTasks();
-  }, []);
+  const updateTodoMutation = useMutation({
+    mutationFn: updateTodo,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
+      console.log("succ");
+    },
+  });
 
   const handleMarkAsDone = async (id: number) => {
-    try {
-      await axios.patch(`http://localhost:6969/todos/${id}`, {
-        is_completed: true,
-      });
-
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task.id === id ? { ...task, is_completed: true } : task
-        )
-      );
-    } catch (error) {
-      console.error("error updating", error);
-    }
+    // Call the mutation to mark the task as done
+    await updateTodoMutation.mutateAsync(id);
   };
 
-  const filteredTask = tasks.filter((task) => {
+  if (isLoading) return "Loading...";
+  if (error) return "An error has occurred: " + error.message;
+
+  console.log(todos);
+
+  const filteredTask = todos.filter((todo: any) => {
     if (selectedTab === "all") {
       return true;
     } else if (selectedTab === "pending") {
-      return !task.is_completed;
+      return !todo.is_completed;
     } else if (selectedTab === "completed") {
-      return task.is_completed;
+      return todo.is_completed;
     }
     return false;
   });
@@ -82,26 +71,30 @@ const List: FC<ListProps> = () => {
         </a>
       </div>
       <div className="space-y-3 mb-3">
-        {filteredTask.map((task) => (
+        {filteredTask.map((todo: any) => (
           <div className="bg-base-200 rounded-xl px-4 py-5 flex flex-col gap-4 sm:flex-row sm:items-center justify-between">
             <div className="space-y-1">
-              <p className="text-secondary">{task.title}</p>
-              <p className="text-zinc-500">{task.date}</p>
+              <p className="text-secondary">{todo.title}</p>
+              <p className="text-zinc-500">{todo.date}</p>
               <p
                 className={`badge ${
-                  task.is_completed ? "badge-success" : "badge-secondary"
+                  todo.is_completed ? "badge-success" : "badge-secondary"
                 }  badge-outline rounded-md`}
               >
-                {task.is_completed ? "Completed" : "Pending"}
+                {todo.is_completed ? "Completed" : "Pending"}
               </p>
             </div>
             <div className="space-y-1 space-x-4">
-              <button
-                onClick={() => handleMarkAsDone(task.id)}
-                className="btn btn-success font-bold text-base rounded-xl h-8 min-h-6"
-              >
-                Done
-              </button>
+              {todo.is_completed ? (
+                ""
+              ) : (
+                <button
+                  className="btn btn-success font-bold text-base rounded-xl h-8 min-h-6"
+                  onClick={() => handleMarkAsDone(todo.id)}
+                >
+                  Done
+                </button>
+              )}
               <button className="btn btn-accent font-bold text-base rounded-xl h-8 min-h-6">
                 Delete
               </button>

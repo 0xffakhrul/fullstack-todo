@@ -1,27 +1,39 @@
 import { useState } from "react";
 import Input from "./components/Input";
-import List, { Task } from "./components/List";
+import List from "./components/List";
 import Header from "./components/Header";
+import {
+  QueryClientProvider,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { createTodo } from "./hooks/useTodo";
+import { Todo } from "./utils/types";
 
 export default function App() {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const queryClient = useQueryClient();
+  const createTodoMutation = useMutation({
+    mutationFn: async (todo: Todo) => {
+      const newTodo = await createTodo(todo.title);
+      return newTodo;
+    },
+    onSuccess: (newTodo) => {
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
+      console.log("Added todo:", newTodo);
+    },
+  });
 
-  const handleAddTask = (
-    id: number,
-    title: string,
-    date: string,
-    is_completed: boolean
-  ) => {
-    const newTask = { id, title, date, is_completed };
-    setTasks([...tasks, newTask]);
-    console.log(newTask);
+  const handleAddTodo = (todo: Todo) => {
+    createTodoMutation.mutate(todo);
   };
 
   return (
-    <div className="max-w-4xl mx-auto my-8 px-6">
-      <Header tasks={tasks} />
-      <List />
-      <Input onAddTask={handleAddTask} />
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <div className="max-w-4xl mx-auto my-8 px-6">
+        <Header />
+        <List />
+        <Input onAddTask={handleAddTodo} />
+      </div>
+    </QueryClientProvider>
   );
 }
