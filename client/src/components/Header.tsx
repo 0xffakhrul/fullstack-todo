@@ -1,5 +1,4 @@
 import { FC, useEffect, useState } from "react";
-import { todoCount } from "../hooks/useTodo";
 import { useQuery } from "@tanstack/react-query";
 
 interface HeaderProps {

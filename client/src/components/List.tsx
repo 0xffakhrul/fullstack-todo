@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { FC, useEffect, useState } from "react";
-import { updateTodo, useFetchTodos } from "../hooks/useTodo";
+import { useUpdateTodo, useFetchTodos } from "../hooks/useTodo";
 import { Todo } from "../utils/types";
 
 interface ListProps {}
@@ -16,8 +16,11 @@ const List: FC<ListProps> = () => {
     error,
   } = useQuery({ queryKey: ["todos"], queryFn: useFetchTodos });
 
+  console.log("Todos:", todos);
+
+
   const updateTodoMutation = useMutation({
-    mutationFn: updateTodo,
+    mutationFn: useUpdateTodo,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
       console.log("succ");
@@ -34,16 +37,18 @@ const List: FC<ListProps> = () => {
 
   console.log(todos);
 
-  const filteredTask = todos.filter((todo: any) => {
-    if (selectedTab === "all") {
-      return true;
-    } else if (selectedTab === "pending") {
-      return !todo.is_completed;
-    } else if (selectedTab === "completed") {
-      return todo.is_completed;
-    }
-    return false;
-  });
+  const filteredTask = Array.isArray(todos)
+    ? todos.filter((todo: any) => {
+        if (selectedTab === "all") {
+          return true;
+        } else if (selectedTab === "pending") {
+          return !todo.is_completed;
+        } else if (selectedTab === "completed") {
+          return todo.is_completed;
+        }
+        return false;
+      })
+    : [];
 
   return (
     <div className="space-y-3 mb-3">

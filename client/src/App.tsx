@@ -7,14 +7,14 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { createTodo } from "./hooks/useTodo";
+import { useCreateTodo } from "./hooks/useTodo";
 import { Todo } from "./utils/types";
 
 export default function App() {
   const queryClient = useQueryClient();
   const createTodoMutation = useMutation({
     mutationFn: async (todo: Todo) => {
-      const newTodo = await createTodo(todo.title);
+      const newTodo = await useCreateTodo(todo.title);
       return newTodo;
     },
     onSuccess: (newTodo) => {
