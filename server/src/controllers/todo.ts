@@ -36,6 +36,19 @@ const createTodo = async (newTodo: Todo): Promise<QueryResult> => {
   }
 };
 
+const deleteTodo = async (todoId: number): Promise<QueryResult> => {
+  const query = "DELETE FROM todo WHERE id = $1 RETURNING *";
+  const values = [todoId];
+
+  try {
+    const result = await pool.query(query, values);
+    return result.rows[0];
+  } catch (error) {
+    console.error("Error deleting todo:", error.message);
+    throw error;
+  }
+};
+
 const updateTodo = async (
   todoId: number,
   updatedFields: { is_completed?: boolean }
@@ -52,4 +65,4 @@ const updateTodo = async (
   }
 };
 
-export { getAllTodos, createTodo, updateTodo };
+export { getAllTodos, createTodo, deleteTodo, updateTodo };

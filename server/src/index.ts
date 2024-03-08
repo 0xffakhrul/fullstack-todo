@@ -2,7 +2,12 @@ import express, { Application } from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { getPgVersion } from "./config/db.config";
-import { createTodo, getAllTodos, updateTodo } from "./controllers/todo";
+import {
+  createTodo,
+  deleteTodo,
+  getAllTodos,
+  updateTodo,
+} from "./controllers/todo";
 
 const app: Application = express();
 
@@ -32,6 +37,23 @@ app.get("/todos", async (req, res) => {
     const todos = await getAllTodos();
     res.json(todos);
     console.log(todos);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.delete("/todos/:id", async (req, res) => {
+  const id = parseInt(req.params.id);
+  try {
+    const todo = await deleteTodo(id);
+
+    if (todo) {
+      console.log("Todo deleted successfully");
+      res.json({ message: "Todo deleted successfully", deletedTodo: todo });
+    } else {
+      console.log("Todo not found");
+      res.status(404).json({ message: "Todo not found" });
+    }
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
