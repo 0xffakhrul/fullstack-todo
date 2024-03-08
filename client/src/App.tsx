@@ -1,4 +1,3 @@
-import { useState } from "react";
 import Input from "./components/Input";
 import List from "./components/List";
 import Header from "./components/Header";
@@ -9,6 +8,7 @@ import {
 } from "@tanstack/react-query";
 import { useCreateTodo } from "./hooks/useTodo";
 import { Todo } from "./utils/types";
+import { Toaster } from "react-hot-toast";
 
 export default function App() {
   const queryClient = useQueryClient();
@@ -29,7 +29,8 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="max-w-4xl mx-auto my-8 px-6">
+      <div className="max-w-4xl mx-auto my-10 px-6">
+        <Toaster />
         <Header />
         <List />
         <Input onAddTask={handleAddTodo} />
