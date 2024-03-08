@@ -1,4 +1,5 @@
 import { FC, useState } from "react";
+import toast from "react-hot-toast";
 
 interface InputProps {
   onAddTask: any;
@@ -11,18 +12,42 @@ const Input: FC<InputProps> = ({ onAddTask }) => {
     e.preventDefault();
 
     if (!title.trim()) {
-      return; 
+      return;
     }
 
-    const newTodo = {
-      title,
-      date: new Date().toISOString(), // Set current date as ISO string
-      is_completed: false, 
-    };
-    onAddTask(newTodo);
-
-    console.log(newTodo); // Log the new todo object
-    setTitle(""); 
+    try {
+      const newTodo = {
+        title,
+        date: new Date().toISOString(),
+        is_completed: false,
+      };
+      onAddTask(newTodo);
+      toast.success("Todo added!", {
+        style: {
+          backgroundColor: "#17a24a",
+          color: "white",
+          fontWeight: "bold",
+        },
+        iconTheme: {
+          primary: "#FFFAEE",
+          secondary: "#17a24a",
+        },
+      });
+      console.log(newTodo);
+      setTitle("");
+    } catch (error) {
+      toast.error("Fail to add todo.", {
+        style: {
+          backgroundColor: "#ee524a",
+          color: "white",
+          fontWeight: "bold",
+        },
+        iconTheme: {
+          primary: "#FFFAEE",
+          secondary: "#ee524a",
+        },
+      });
+    }
   };
 
   return (

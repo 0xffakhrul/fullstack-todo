@@ -1,8 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import { FC, useEffect, useState } from "react";
-import { useUpdateTodo, useFetchTodos } from "../hooks/useTodo";
-import { Todo } from "../utils/types";
+import { FC, useState } from "react";
+import { useUpdateTodo, useFetchTodos, useDeleteTodo } from "../hooks/useTodo";
+import toast from "react-hot-toast";
 
 interface ListProps {}
 
@@ -18,7 +17,6 @@ const List: FC<ListProps> = () => {
 
   console.log("Todos:", todos);
 
-
   const updateTodoMutation = useMutation({
     mutationFn: useUpdateTodo,
     onSuccess: () => {
@@ -27,9 +25,70 @@ const List: FC<ListProps> = () => {
     },
   });
 
+  const deleteTodoMutation = useMutation({
+    mutationFn: useDeleteTodo,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
+      console.log("balls");
+    },
+  });
+
   const handleMarkAsDone = async (id: number) => {
-    // Call the mutation to mark the task as done
-    await updateTodoMutation.mutateAsync(id);
+    try {
+      await updateTodoMutation.mutateAsync(id);
+      toast.success("Todo marked as completed", {
+        style: {
+          backgroundColor: "#17a24a",
+          color: "white",
+          fontWeight: "bold",
+        },
+        iconTheme: {
+          primary: "#FFFAEE",
+          secondary: "#17a24a",
+        },
+      });
+    } catch (error) {
+      toast.error(`Fail to update todo ${error}`, {
+        style: {
+          backgroundColor: "#ee524a",
+          color: "white",
+          fontWeight: "bold",
+        },
+        iconTheme: {
+          primary: "#FFFAEE",
+          secondary: "#ee524a",
+        },
+      });
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteTodoMutation.mutateAsync(id);
+      toast.success("Todo deleted", {
+        style: {
+          backgroundColor: "#17a24a",
+          color: "white",
+          fontWeight: "bold",
+        },
+        iconTheme: {
+          primary: "#FFFAEE",
+          secondary: "#17a24a",
+        },
+      });
+    } catch (error) {
+      toast.error(`Fail to update todo ${error}`, {
+        style: {
+          backgroundColor: "#ee524a",
+          color: "white",
+          fontWeight: "bold",
+        },
+        iconTheme: {
+          primary: "#FFFAEE",
+          secondary: "#ee524a",
+        },
+      });
+    }
   };
 
   if (isLoading) return "Loading...";
@@ -77,9 +136,9 @@ const List: FC<ListProps> = () => {
       </div>
       <div className="space-y-3 mb-3">
         {filteredTask.map((todo: any) => (
-          <div className="bg-base-200 rounded-xl px-4 py-5 flex flex-col gap-4 sm:flex-row sm:items-center justify-between">
+          <div className="bg-base-200 rounded-xl px-4 py-5 flex flex-col gap-6 sm:flex-row sm:items-center justify-between">
             <div className="space-y-1">
-              <p className="text-secondary">{todo.title}</p>
+              <p className="text-secondary break-all">{todo.title}</p>
               <p className="text-zinc-500">{todo.date}</p>
               <p
                 className={`badge ${
@@ -89,7 +148,7 @@ const List: FC<ListProps> = () => {
                 {todo.is_completed ? "Completed" : "Pending"}
               </p>
             </div>
-            <div className="space-y-1 space-x-4">
+            <div className="flex items-center space-x-4">
               {todo.is_completed ? (
                 ""
               ) : (
@@ -100,7 +159,10 @@ const List: FC<ListProps> = () => {
                   Done
                 </button>
               )}
-              <button className="btn btn-accent font-bold text-base rounded-xl h-8 min-h-6">
+              <button
+                className="btn btn-accent font-bold text-base rounded-xl h-8 min-h-6"
+                onClick={() => handleDelete(todo.id)}
+              >
                 Delete
               </button>
             </div>
